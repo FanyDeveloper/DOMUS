@@ -10,7 +10,7 @@ const raf = (time) => lenis?.raf(time * 1000);
 
 export function startSmooth() {
   if (lenis) return lenis;
-  lenis = new Lenis();
+  lenis = new Lenis({ lerp: 0.08, syncTouch: true, syncTouchLerp: 0.075 });
   lenis.on('scroll', ScrollTrigger.update);
   gsap.ticker.add(raf);
   gsap.ticker.lagSmoothing(0);

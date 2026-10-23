@@ -18,7 +18,7 @@ export function setupHorizontal({ header, reduced }) {
 
   // Larguras que a própria animação altera ficam congeladas antes de medir o trilho.
   const values = track.querySelector('.s-values');
-  gsap.set(values, { width: values.offsetWidth + window.innerWidth * 0.32 });
+  gsap.set(values, { width: values.offsetWidth + window.innerWidth * 0.64 });
   const items = gsap.utils.toArray('.s-projects__item');
 
   // Comprimento do trilho medido com todos os projetos abertos (largura final);
@@ -81,7 +81,7 @@ export function setupHorizontal({ header, reduced }) {
   const marquee = track.querySelector('.s-marquee__content');
   gsap.set(marquee, { rotation: -90, y: () => window.innerHeight, transformOrigin: 'top left' });
   gsap.from(marquee, {
-    y: () => window.innerHeight * 2.75, ease: 'none',
+    y: () => window.innerHeight * 1.8, ease: 'none',
     scrollTrigger: { ...ca, trigger: '.s-marquee', start: '0% 95%', end: '100% 0%', scrub: 0.5, invalidateOnRefresh: true },
   });
 
@@ -91,7 +91,7 @@ export function setupHorizontal({ header, reduced }) {
   let late = [];
   const refreshLate = () => late.forEach((t) => t.refresh());
   projTl = setupProjects(ca, items, refreshLate);
-  late = [...setupLast(ca), ...setupClosing(ca)];
+  late = [setupLastItem(ca, items.at(-1)), ...setupLast(ca), ...setupClosing(ca)];
   ScrollTrigger.addEventListener('refresh', refreshLate);
   st.refresh();
 
@@ -105,12 +105,12 @@ function setupValues(ca) {
   const el = document.querySelector('.s-values');
   const terms = el.querySelectorAll('.s-values__term');
 
-  // Parallax de espaçamento entre os três termos (scrub 1).
+  // Parallax de espaçamento entre os três termos (scrub 1), com o dobro da amplitude da referência.
   const tl = gsap.timeline();
-  tl.to(terms[0], { paddingLeft: '12vw' }, 0)
-    .to(terms[1], { paddingRight: '3vw' }, 0)
-    .to(terms[1].querySelector('.s-values__text'), { marginRight: '3vw' }, 0)
-    .to(terms[2], { paddingLeft: '20vw' }, 0);
+  tl.to(terms[0], { paddingLeft: '24vw' }, 0)
+    .to(terms[1], { paddingRight: '6vw' }, 0)
+    .to(terms[1].querySelector('.s-values__text'), { marginRight: '6vw' }, 0)
+    .to(terms[2], { paddingLeft: '40vw' }, 0);
   ScrollTrigger.create({ ...ca, animation: tl, trigger: el, start: '0% 100%', end: '100% 0%', scrub: 1 });
 }
 
@@ -154,6 +154,24 @@ function pinInside(ca, section, inner, extra) {
   const tl = gsap.timeline();
   tl.fromTo(inner, { x: 0 }, { x: extra, ease: 'none' });
   return ScrollTrigger.create({ ...ca, animation: tl, trigger: section, start: 'left left', end: 'right right', scrub: true });
+}
+
+// Último projeto (Lote 43): depois de aberto fica parado na esquerda, encolhe para a largura
+// da galeria (como o last-item da referência) e, quando a galeria sobe, sai para cima sumindo.
+function setupLastItem(ca, item) {
+  const inner = item.querySelector('.s-projects__inner');
+  const vw = window.innerWidth;
+  const shrink = vw * 0.175; // 60vw → 42.5vw
+  const tl = gsap.timeline();
+  tl.fromTo(item, { x: 0 }, { x: vw * 1.2, ease: 'none', duration: 1.6 }, 0)
+    .fromTo(item, { clipPath: 'inset(0px 0px 0px 0px)' }, { clipPath: `inset(0px ${shrink}px 0px 0px)`, ease: 'none', duration: 0.8 }, 0)
+    .fromTo(inner, { width: '60vw' }, { width: '42.5vw', ease: 'none', duration: 0.8 }, 0)
+    .to(item, { scale: 0.85, transformOrigin: '21.25vw 0%', ease: 'power1.in', duration: 0.8 }, 0.8)
+    .to(item, { yPercent: -100, autoAlpha: 0, ease: 'power1.in', duration: 0.8 }, 0.8);
+  return ScrollTrigger.create({
+    // Medido pela .s-last (logo depois do card) para o gatilho não depender do próprio x animado.
+    ...ca, animation: tl, trigger: '.s-last', start: 'left 60%', end: 'left -60%', scrub: true,
+  });
 }
 
 function setupLast(ca) {

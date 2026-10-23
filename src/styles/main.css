@@ -387,7 +387,3 @@ html:not(.js) .hdr__logo { opacity: 1; font-size: 1.65rem; width: 100%; height: 
   .modal__fields { grid-template-columns: 1fr; }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .s-marquee__run { animation: none; }
-  .link::after { transition: none; }
-}

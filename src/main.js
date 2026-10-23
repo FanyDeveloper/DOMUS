@@ -11,8 +11,9 @@ import { setupMenu, setupNavigation, setupCursor, setupButtons, setupValuesHover
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
-const reducedQuery = '(prefers-reduced-motion: reduce)';
-const reducedAtStart = window.matchMedia(reducedQuery).matches;
+// Como na referência, a preferência do sistema por menos movimento é ignorada:
+// todos os visitantes veem as animações completas.
+const reducedAtStart = false;
 
 // Entrada única por carregamento: o preloader roda uma vez; o resto se reconstrói por breakpoint.
 let introPlayed = false;
@@ -33,12 +34,12 @@ async function boot() {
   mm.add({
     desktop: '(min-width: 951px)',
     mobile: '(max-width: 950px)',
-    reduced: reducedQuery,
   }, (ctx) => {
-    const { desktop, reduced } = ctx.conditions;
+    const { desktop } = ctx.conditions;
+    const reduced = false;
     const cleanups = [];
 
-    if (desktop && !reduced) startSmooth();
+    if (!reduced) startSmooth();
     lockScroll(!introPlayed);
 
     const header = buildHeaderReturn();
@@ -70,7 +71,7 @@ async function boot() {
 
     return () => {
       cleanups.forEach((fn) => fn?.());
-      if (desktop) stopSmooth();
+      if (!reduced) stopSmooth();
     };
   });
 }
